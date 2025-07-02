@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E-Hospital System</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    h2 { color: #0066cc; }
+    section { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+    label, select, input, textarea { display: block; margin: 5px 0; }
+    textarea { width: 100%; height: 50px; }
+    pre { background: #f9f9f9; padding: 10px; }
+    button { margin-top: 5px; }
+  </style>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+  <h1>E-Hospital System</h1>
+
+  <!-- Patient Booking -->
+  <section id="patient-section">
+    <h2>Patient: Book Appointment</h2>
+    <label>Choose Doctor:
+      <select id="doctor-select"></select>
+    </label>
+    <label>Slot:
+      <input id="slot-input" placeholder="e.g. 10:00 AM">
+    </label>
+    <button onclick="bookAppointment()">Book Appointment</button>
+    <h4>Appointments</h4>
+    <ul id="appointments-list"></ul>
+  </section>
+
+  <!-- Doctor Dashboard -->
+  <section id="doctor-section">
+    <h2>Doctor: Manage Appointments</h2>
+    <ul id="doctor-appts"></ul>
+  </section>
+
+  <!-- Prescriptions -->
+  <section>
+    <h2>Doctor: Prescriptions</h2>
+    <textarea id="prescription-text" placeholder="Write prescription..."></textarea>
+    <button onclick="savePrescription()">Save</button>
+    <ul id="prescriptions-list"></ul>
+  </section>
+
+  <!-- Lab Admin -->
+  <section>
+    <h2>Lab Admin: Add Test Result</h2>
+    <label>Patient ID: <input id="lab-patient-id"></label>
+    <textarea id="lab-result-text" placeholder="Result details..."></textarea>
+    <button onclick="addLabResult()">Submit</button>
+    <ul id="lab-results-list"></ul>
+  </section>
+
+  <!-- Pharmacist -->
+  <section>
+    <h2>Pharmacist: Update Medicine Stock</h2>
+    <textarea id="pharma-stock-json" placeholder='[{"name":"Paracetamol","qty":100}]'></textarea>
+    <button onclick="updateStock()">Update</button>
+    <pre id="pharma-stock-view"></pre>
+  </section>
+
+  <!-- Billing -->
+  <section>
+    <h2>Billing: Generate Bill</h2>
+    <button onclick="generateBill()">Generate</button>
+    <ul id="billing-list"></ul>
+  </section>
+
+  <!-- Notifications -->
+  <section>
+    <h2>Notifications</h2>
+    <ul id="notifications-list"></ul>
+  </section>
+
+<script>
+  const state = {
+    doctors: [
+      { id: 1, name: "Dr. Smith", availableSlots: ["10:00", "11:00"] },
+      { id: 2, name: "Dr. Jane", availableSlots: ["12:00", "14:00"] },
+    ],
+    appointments: [],
+    prescriptions: [],
+    labResults: [],
+    pharmaStock: [],
+    bills: [],
+    notifications: []
+  };
+
+  const patientId = 100;
+  const doctorId = 1;
+
+  // Populate doctor dropdown
+  const doctorSelect = document.getElementById("doctor-select");
+  state.doctors.forEach(doc => {
+    const opt = document.createElement("option");
+    opt.value = doc.id;
+    opt.textContent = `${doc.name} (${doc.availableSlots.join(", ")})`;
+    doctorSelect.appendChild(opt);
+  });
+
+  function bookAppointment() {
+    const docId = parseInt(doctorSelect.value);
+    const slot = document.getElementById("slot-input").value;
+    const appt = { id: Date.now(), doctorId: docId, patientId, slot, status: "pending" };
+    state.appointments.push(appt);
+    state.notifications.push({ to: docId, type: "NEW_APPOINTMENT", data: appt });
+    renderAppointments();
+    renderDoctorAppointments();
+    renderNotifications();
+  }
+
+  function renderAppointments() {
+    const list = document.getElementById("appointments-list");
+    list.innerHTML = "";
+    state.appointments
+      .filter(a => a.patientId === patientId)
+      .forEach(a => {
+        const li = document.createElement("li");
+        li.textContent = `${a.slot} - ${a.status}`;
+        list.appendChild(li);
+      });
+  }
+
+  function renderDoctorAppointments() {
+    const list = document.getElementById("doctor-appts");
+    list.innerHTML = "";
+    state.appointments
+      .filter(a => a.doctorId === doctorId)
+      .forEach(a => {
+        const li = document.createElement("li");
+        li.textContent = `${a.slot} - ${a.status} `;
+        if (a.status === "pending") {
+          const accept = document.createElement("button");
+          accept.textContent = "Accept";
+          accept.onclick = () => updateAppointment(a.id, "accepted");
+          const reject = document.createElement("button");
+          reject.textContent = "Reject";
+          reject.onclick = () => updateAppointment(a.id, "rejected");
+          li.appendChild(accept);
+          li.appendChild(reject);
+        }
+        list.appendChild(li);
+      });
+  }
+
+  function updateAppointment(id, status) {
+    const appt = state.appointments.find(a => a.id === id);
+    appt.status = status;
+    state.notifications.push({ to: appt.patientId, type: "APPOINTMENT_UPDATE", data: appt });
+    renderAppointments();
+    renderDoctorAppointments();
+    renderNotifications();
+  }
+
+  function savePrescription() {
+    const text = document.getElementById("prescription-text").value;
+    const entry = { id: Date.now(), doctorId, text, date: new Date().toLocaleString() };
+    state.prescriptions.push(entry);
+    renderPrescriptions();
+  }
+
+  function renderPrescriptions() {
+    const list = document.getElementById("prescriptions-list");
+    list.innerHTML = "";
+    state.prescriptions.forEach(p => {
+      const li = document.createElement("li");
+      li.textContent = `${p.date} – Dr.${p.doctorId}: ${p.text}`;
+      list.appendChild(li);
+    });
+  }
+
+  function addLabResult() {
+    const pid = document.getElementById("lab-patient-id").value;
+    const result = document.getElementById("lab-result-text").value;
+    const entry = { id: Date.now(), patientId: pid, result, date: new Date().toLocaleString() };
+    state.labResults.push(entry);
+    renderLabResults();
+  }
+
+  function renderLabResults() {
+    const list = document.getElementById("lab-results-list");
+    list.innerHTML = "";
+    state.labResults.forEach(l => {
+      const li = document.createElement("li");
+      li.textContent = `${l.date} – Patient ${l.patientId}: ${l.result}`;
+      list.appendChild(li);
+    });
+  }
+
+  function updateStock() {
+    try {
+      const json = document.getElementById("pharma-stock-json").value;
+      state.pharmaStock = JSON.parse(json);
+      renderPharmaStock();
+    } catch {
+      alert("Invalid JSON!");
+    }
+  }
+
+  function renderPharmaStock() {
+    const pre = document.getElementById("pharma-stock-view");
+    pre.textContent = JSON.stringify(state.pharmaStock, null, 2);
+  }
+
+  function generateBill() {
+    const bill = {
+      id: Date.now(),
+      date: new Date().toLocaleString(),
+      items: [
+        ...state.appointments.filter(a => a.status === "accepted").map(a => ({ type: "Consult", id: a.id })),
+        ...state.labResults.map(l => ({ type: "Lab", id: l.id })),
+        ...state.pharmaStock.map(m => ({ type: "Medicine", name: m.name }))
+      ]
+    };
+    state.bills.push(bill);
+    renderBilling();
+  }
+
+  function renderBilling() {
+    const list = document.getElementById("billing-list");
+    list.innerHTML = "";
+    state.bills.forEach(b => {
+      const li = document.createElement("li");
+      li.textContent = `${b.date} – ${b.items.length} items`;
+      list.appendChild(li);
+    });
+  }
+
+  function renderNotifications() {
+    const list = document.getElementById("notifications-list");
+    list.innerHTML = "";
+    state.notifications.forEach(n => {
+      const li = document.createElement("li");
+      li.textContent = `${n.type} → User ${n.to}`;
+      list.appendChild(li);
+    });
+  }
+
+  // Initial render
+  renderAppointments();
+  renderDoctorAppointments();
+  renderPrescriptions();
+  renderLabResults();
+  renderPharmaStock();
+  renderBilling();
+  renderNotifications();
+</script>
+
+</body>
+</html>
