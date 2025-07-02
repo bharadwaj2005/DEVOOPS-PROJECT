@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Dashboard - E-Hospital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    #appointmentFormCard { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Patient Dashboard</h2>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <hr/>
+
+    <div class="row mt-4">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Book Appointment</h5>
+            <p class="card-text">Schedule a visit with a doctor.</p>
+            <button class="btn btn-light" onclick="toggleAppointmentForm()">Book</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title">View Prescriptions</h5>
+            <p class="card-text">Check your prescribed medicines and advice.</p>
+            <button class="btn btn-light" onclick="loadPatientPrescriptions()">View</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Lab Results</h5>
+            <p class="card-text">Access lab test results shared by Lab Admin.</p>
+            <button class="btn btn-light" onclick="alert('Lab results feature coming soon!')">View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointment Form (Initially Hidden) -->
+    <div class="card mt-4" id="appointmentFormCard">
+      <div class="card-body">
+        <h5 class="card-title">Book Appointment Form</h5>
+        <form id="appointmentForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="patientName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="patientName" required />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="patientAge" class="form-label">Age</label>
+              <input type="number" class="form-control" id="patientAge" required />
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="patientGender" class="form-label">Gender</label>
+              <select class="form-select" id="patientGender" required>
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="appointmentDate" class="form-label">Date</label>
+              <input type="date" class="form-control" id="appointmentDate" required />
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="appointmentTime" class="form-label">Time</label>
+              <input type="time" class="form-control" id="appointmentTime" required />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="reason" class="form-label">Reason for Visit</label>
+            <textarea class="form-control" id="reason" rows="3" required></textarea>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-secondary me-2" onclick="toggleAppointmentForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Book Appointment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Prescriptions List -->
+    <div class="mt-5">
+      <h4>Your Prescriptions</h4>
+      <div id="prescriptionList"></div>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "patient") {
+      alert("Unauthorized access. Please log in as a Patient.");
+      window.location.href = "index.html";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+
+    function toggleAppointmentForm() {
+      const formCard = document.getElementById("appointmentFormCard");
+      formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+    }
+
+    document.getElementById("appointmentForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("patientName").value;
+      const age = document.getElementById("patientAge").value;
+      const gender = document.getElementById("patientGender").value;
+      const date = document.getElementById("appointmentDate").value;
+      const time = document.getElementById("appointmentTime").value;
+      const reason = document.getElementById("reason").value;
+
+      const appointment = {
+        patientEmail: user.email,
+        name,
+        age,
+        gender,
+        date,
+        time,
+        reason
+      };
+
+      let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      appointments.push(appointment);
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+
+      alert("Appointment booked successfully!");
+      document.getElementById("appointmentForm").reset();
+      toggleAppointmentForm();
+    });
+
+    function loadPatientPrescriptions() {
+      const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+      const currentUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+      const userPrescriptions = prescriptions;
+
+      const container = document.getElementById("prescriptionList");
+      if (userPrescriptions.length === 0) {
+        container.innerHTML = "<p>No prescriptions available.</p>";
+        return;
+      }
+
+      let html = "<ul class='list-group'>";
+      userPrescriptions.forEach(p => {
+        html += `
+          <li class='list-group-item'>
+             <strong>Name:</strong> ${p.patientName}<br>
+            <strong>Date:</strong> ${p.date}<br>
+            <strong>Symptoms:</strong> ${p.symptoms}<br>
+            <strong>Diagnosis:</strong> ${p.diagnosis}<br>
+            <strong>Medicines:</strong> ${p.medicines}
+          </li>`;
+      });
+      html += "</ul>";
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

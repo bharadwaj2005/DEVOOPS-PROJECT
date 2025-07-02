@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharmacist Dashboard - E-Hospital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Pharmacist Dashboard</h2>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <hr>
+
+    <div class="mt-4">
+      <h4>All Prescriptions</h4>
+      <div id="allPrescriptions"></div>
+<button class="btn btn-primary mt-3" onclick="printPrescriptions()">Print Prescriptions</button>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "pharmacist") {
+      alert("Unauthorized access. Please log in as a Pharmacist.");
+      window.location.href = "index.html";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+
+    function loadAllPrescriptions() {
+      const prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+      const container = document.getElementById("allPrescriptions");
+
+      if (prescriptions.length === 0) {
+        container.innerHTML = "<p>No prescriptions found.</p>";
+        return;
+      }
+
+      let html = "<ul class='list-group'>";
+      prescriptions.forEach((p, index) => {
+        html += `
+          <li class='list-group-item' id='prescription-${index}'>
+            <strong>Name:</strong> ${p.patientName}<br>
+            <strong>Date:</strong> ${p.date}<br>
+            <strong>Symptoms:</strong> ${p.symptoms}<br>
+            <strong>Diagnosis:</strong> ${p.diagnosis}<br>
+            <strong>Medicines:</strong> ${p.medicines}<br>
+            <button class='btn btn-sm btn-outline-primary mt-2' onclick='printSinglePrescription("prescription-${index}")'>Print</button>
+          </li>`;
+      });
+      html += "</ul>";
+      container.innerHTML = html;
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAllPrescriptions);
+
+function printPrescriptions() {
+  const printContents = document.getElementById("allPrescriptions").innerHTML;
+  const originalContents = document.body.innerHTML;
+  document.body.innerHTML = `<div class='container mt-4'>${printContents}</div>`;
+  window.print();
+  document.body.innerHTML = originalContents;
+  location.reload();
+}
+
+function printSinglePrescription(id) {
+  const printContents = document.getElementById(id).innerHTML;
+  const originalContents = document.body.innerHTML;
+  document.body.innerHTML = `<div class='container mt-4'><ul class='list-group'><li class='list-group-item'>${printContents}</li></ul></div>`;
+  window.print();
+  document.body.innerHTML = originalContents;
+  location.reload();
+}
+  </script>
+</body>
+</html>

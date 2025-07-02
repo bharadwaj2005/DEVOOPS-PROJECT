@@ -1,254 +1,145 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>E-Hospital System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body { font-family: Arial; margin: 20px; }
-    h2 { color: #0066cc; }
-    section { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
-    label, select, input, textarea { display: block; margin: 5px 0; }
-    textarea { width: 100%; height: 50px; }
-    pre { background: #f9f9f9; padding: 10px; }
-    button { margin-top: 5px; }
+    #loginContainer { display: none; }
+    .hero {
+      background: linear-gradient(to right, #007bff, #0056b3);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 3rem;
+    }
+    .info-section {
+      padding: 60px 20px;
+    }
+    .feature-icon {
+      font-size: 3rem;
+      color: #007bff;
+    }
   </style>
-  <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
-
-  <h1>E-Hospital System</h1>
-
-  <!-- Patient Booking -->
-  <section id="patient-section">
-    <h2>Patient: Book Appointment</h2>
-    <label>Choose Doctor:
-      <select id="doctor-select"></select>
-    </label>
-    <label>Slot:
-      <input id="slot-input" placeholder="e.g. 10:00 AM">
-    </label>
-    <button onclick="bookAppointment()">Book Appointment</button>
-    <h4>Appointments</h4>
-    <ul id="appointments-list"></ul>
+  <!-- Hero Section -->
+  <section class="hero" id="homepage">
+    <div class="container">
+      <h1 class="mb-3">Welcome to E-Hospital Management System</h1>
+      <p class="lead">Empowering Digital Healthcare – Secure, Smart & Seamless</p>
+      <button class="btn btn-light mt-4" onclick="goToLogin()">Login</button>
+    </div>
   </section>
 
-  <!-- Doctor Dashboard -->
-  <section id="doctor-section">
-    <h2>Doctor: Manage Appointments</h2>
-    <ul id="doctor-appts"></ul>
+  <!-- Project Overview -->
+  <section class="info-section bg-light text-center">
+    <div class="container">
+      <h2 class="mb-4">About the Project</h2>
+      <p class="mb-3">The E-Hospital System is a web-based platform designed to streamline healthcare services by enabling patients, doctors, lab admins, pharmacists, and billing staff to efficiently interact and manage medical data in real-time.</p>
+      <p>It ensures secure appointment booking, doctor approval, lab report updates, prescription sharing, medicine stock tracking, and billing generation – all from a unified dashboard.</p>
+    </div>
   </section>
 
-  <!-- Prescriptions -->
-  <section>
-    <h2>Doctor: Prescriptions</h2>
-    <textarea id="prescription-text" placeholder="Write prescription..."></textarea>
-    <button onclick="savePrescription()">Save</button>
-    <ul id="prescriptions-list"></ul>
+  <!-- Features Section -->
+  <section class="info-section">
+    <div class="container">
+      <h2 class="text-center mb-5">Key Features</h2>
+      <div class="row text-center">
+        <div class="col-md-4">
+          <div class="mb-3 feature-icon">📅</div>
+          <h5>Appointment Scheduling</h5>
+          <p>Patients can book appointments with available doctors based on their convenience.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3 feature-icon">🧪</div>
+          <h5>Lab Integration</h5>
+          <p>Lab admins update test results, making them instantly accessible to doctors and patients.</p>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3 feature-icon">💊</div>
+          <h5>Prescription & Pharmacy</h5>
+          <p>Doctors issue prescriptions that pharmacists can fulfill directly with real-time stock updates.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- Lab Admin -->
-  <section>
-    <h2>Lab Admin: Add Test Result</h2>
-    <label>Patient ID: <input id="lab-patient-id"></label>
-    <textarea id="lab-result-text" placeholder="Result details..."></textarea>
-    <button onclick="addLabResult()">Submit</button>
-    <ul id="lab-results-list"></ul>
-  </section>
+  <!-- Login Form -->
+  <div class="container mt-5" id="loginContainer">
+    <h2 class="text-center mb-4">E-Hospital Login</h2>
+    <form id="loginForm" class="mx-auto" style="max-width: 400px;">
+      <div class="mb-3">
+        <label for="loginEmail" class="form-label">Email address</label>
+        <input type="email" class="form-control" id="loginEmail" required />
+      </div>
+      <div class="mb-3">
+        <label for="loginPassword" class="form-label">Password</label>
+        <input type="password" class="form-control" id="loginPassword" required />
+      </div>
+      <div class="mb-3">
+        <label for="userRole" class="form-label">Login as</label>
+        <select class="form-select" id="userRole" required>
+          <option value="">Select Role</option>
+          <option value="patient">Patient</option>
+          <option value="doctor">Doctor</option>
+          <option value="lab">Lab Admin</option>
+          <option value="pharmacist">Pharmacist</option>
+          <option value="billing">Billing Staff</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+  </div>
 
-  <!-- Pharmacist -->
-  <section>
-    <h2>Pharmacist: Update Medicine Stock</h2>
-    <textarea id="pharma-stock-json" placeholder='[{"name":"Paracetamol","qty":100}]'></textarea>
-    <button onclick="updateStock()">Update</button>
-    <pre id="pharma-stock-view"></pre>
-  </section>
+  <script>
+    const users = [
+      { email: "patient@example.com", password: "patient123", role: "patient" },
+      { email: "doctor@example.com", password: "doctor123", role: "doctor" },
+      { email: "lab@example.com", password: "lab123", role: "lab" },
+      { email: "pharma@example.com", password: "pharma123", role: "pharmacist" },
+      { email: "billing@example.com", password: "billing123", role: "billing" }
+    ];
 
-  <!-- Billing -->
-  <section>
-    <h2>Billing: Generate Bill</h2>
-    <button onclick="generateBill()">Generate</button>
-    <ul id="billing-list"></ul>
-  </section>
-
-  <!-- Notifications -->
-  <section>
-    <h2>Notifications</h2>
-    <ul id="notifications-list"></ul>
-  </section>
-
-<script>
-  const state = {
-    doctors: [
-      { id: 1, name: "Dr. Smith", availableSlots: ["10:00", "11:00"] },
-      { id: 2, name: "Dr. Jane", availableSlots: ["12:00", "14:00"] },
-    ],
-    appointments: [],
-    prescriptions: [],
-    labResults: [],
-    pharmaStock: [],
-    bills: [],
-    notifications: []
-  };
-
-  const patientId = 100;
-  const doctorId = 1;
-
-  // Populate doctor dropdown
-  const doctorSelect = document.getElementById("doctor-select");
-  state.doctors.forEach(doc => {
-    const opt = document.createElement("option");
-    opt.value = doc.id;
-    opt.textContent = `${doc.name} (${doc.availableSlots.join(", ")})`;
-    doctorSelect.appendChild(opt);
-  });
-
-  function bookAppointment() {
-    const docId = parseInt(doctorSelect.value);
-    const slot = document.getElementById("slot-input").value;
-    const appt = { id: Date.now(), doctorId: docId, patientId, slot, status: "pending" };
-    state.appointments.push(appt);
-    state.notifications.push({ to: docId, type: "NEW_APPOINTMENT", data: appt });
-    renderAppointments();
-    renderDoctorAppointments();
-    renderNotifications();
-  }
-
-  function renderAppointments() {
-    const list = document.getElementById("appointments-list");
-    list.innerHTML = "";
-    state.appointments
-      .filter(a => a.patientId === patientId)
-      .forEach(a => {
-        const li = document.createElement("li");
-        li.textContent = `${a.slot} - ${a.status}`;
-        list.appendChild(li);
-      });
-  }
-
-  function renderDoctorAppointments() {
-    const list = document.getElementById("doctor-appts");
-    list.innerHTML = "";
-    state.appointments
-      .filter(a => a.doctorId === doctorId)
-      .forEach(a => {
-        const li = document.createElement("li");
-        li.textContent = `${a.slot} - ${a.status} `;
-        if (a.status === "pending") {
-          const accept = document.createElement("button");
-          accept.textContent = "Accept";
-          accept.onclick = () => updateAppointment(a.id, "accepted");
-          const reject = document.createElement("button");
-          reject.textContent = "Reject";
-          reject.onclick = () => updateAppointment(a.id, "rejected");
-          li.appendChild(accept);
-          li.appendChild(reject);
-        }
-        list.appendChild(li);
-      });
-  }
-
-  function updateAppointment(id, status) {
-    const appt = state.appointments.find(a => a.id === id);
-    appt.status = status;
-    state.notifications.push({ to: appt.patientId, type: "APPOINTMENT_UPDATE", data: appt });
-    renderAppointments();
-    renderDoctorAppointments();
-    renderNotifications();
-  }
-
-  function savePrescription() {
-    const text = document.getElementById("prescription-text").value;
-    const entry = { id: Date.now(), doctorId, text, date: new Date().toLocaleString() };
-    state.prescriptions.push(entry);
-    renderPrescriptions();
-  }
-
-  function renderPrescriptions() {
-    const list = document.getElementById("prescriptions-list");
-    list.innerHTML = "";
-    state.prescriptions.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.date} – Dr.${p.doctorId}: ${p.text}`;
-      list.appendChild(li);
+    document.addEventListener("DOMContentLoaded", () => {
+      const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+      if (loggedInUser) {
+        window.location.href = loggedInUser.role + ".html";
+      } else {
+        document.getElementById("homepage").style.display = "block";
+      }
     });
-  }
 
-  function addLabResult() {
-    const pid = document.getElementById("lab-patient-id").value;
-    const result = document.getElementById("lab-result-text").value;
-    const entry = { id: Date.now(), patientId: pid, result, date: new Date().toLocaleString() };
-    state.labResults.push(entry);
-    renderLabResults();
-  }
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const role = document.getElementById("userRole").value;
 
-  function renderLabResults() {
-    const list = document.getElementById("lab-results-list");
-    list.innerHTML = "";
-    state.labResults.forEach(l => {
-      const li = document.createElement("li");
-      li.textContent = `${l.date} – Patient ${l.patientId}: ${l.result}`;
-      list.appendChild(li);
+      const user = users.find(
+        (u) => u.email === email && u.password === password && u.role === role
+      );
+
+      if (user) {
+        sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+        showDashboard(role);
+      } else {
+        alert("Invalid credentials or role.");
+      }
     });
-  }
 
-  function updateStock() {
-    try {
-      const json = document.getElementById("pharma-stock-json").value;
-      state.pharmaStock = JSON.parse(json);
-      renderPharmaStock();
-    } catch {
-      alert("Invalid JSON!");
+    function showDashboard(role) {
+      window.location.href = role + ".html";
     }
-  }
 
-  function renderPharmaStock() {
-    const pre = document.getElementById("pharma-stock-view");
-    pre.textContent = JSON.stringify(state.pharmaStock, null, 2);
-  }
-
-  function generateBill() {
-    const bill = {
-      id: Date.now(),
-      date: new Date().toLocaleString(),
-      items: [
-        ...state.appointments.filter(a => a.status === "accepted").map(a => ({ type: "Consult", id: a.id })),
-        ...state.labResults.map(l => ({ type: "Lab", id: l.id })),
-        ...state.pharmaStock.map(m => ({ type: "Medicine", name: m.name }))
-      ]
-    };
-    state.bills.push(bill);
-    renderBilling();
-  }
-
-  function renderBilling() {
-    const list = document.getElementById("billing-list");
-    list.innerHTML = "";
-    state.bills.forEach(b => {
-      const li = document.createElement("li");
-      li.textContent = `${b.date} – ${b.items.length} items`;
-      list.appendChild(li);
-    });
-  }
-
-  function renderNotifications() {
-    const list = document.getElementById("notifications-list");
-    list.innerHTML = "";
-    state.notifications.forEach(n => {
-      const li = document.createElement("li");
-      li.textContent = `${n.type} → User ${n.to}`;
-      list.appendChild(li);
-    });
-  }
-
-  // Initial render
-  renderAppointments();
-  renderDoctorAppointments();
-  renderPrescriptions();
-  renderLabResults();
-  renderPharmaStock();
-  renderBilling();
-  renderNotifications();
-</script>
-
+    function goToLogin() {
+      document.getElementById("homepage").style.display = "none";
+      document.getElementById("loginContainer").style.display = "block";
+    }
+  </script>
 </body>
 </html>

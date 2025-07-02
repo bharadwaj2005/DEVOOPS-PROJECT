@@ -1,0 +1,415 @@
+<!-- doctor.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Dashboard - E-Hospital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Doctor Dashboard</h2>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <hr>
+
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <div class="card text-white bg-warning mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Appointment Requests</h5>
+            <p class="card-text">View and respond to patient appointment requests.</p>
+            <button class="btn btn-light" onclick="alert('Appointments feature coming soon!')">Manage</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Write Prescription</h5>
+            <p class="card-text">Create and store prescriptions for patients.</p>
+            <button class="btn btn-light" onclick="alert('Prescription form coming soon!')">Write</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Patient History</h5>
+            <p class="card-text">Access records of previous consultations and treatments.</p>
+            <button class="btn btn-light" onclick="alert('Patient history feature coming soon!')">View History</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+
+    // Auth check
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "doctor") {
+      alert("Unauthorized access. Please log in as a Doctor.");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard - E-Hospital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Doctor Dashboard</h2>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <hr/>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Appointment Requests</h5>
+            <div id="appointmentsList">
+              <p>No appointment requests available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Write Prescription</h5>
+            <button class="btn btn-light" onclick="togglePrescriptionForm()">Write</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Patient History</h5>
+            <button class="btn btn-light" onclick="alert('Patient history feature coming soon!')">View History</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prescription Form (Hidden Initially) -->
+      <div class="col-md-12 mt-3" id="prescriptionFormCard" style="display: none;">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Write Prescription</h5>
+            <form id="prescriptionForm">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="prescriptionPatient" class="form-label">Patient Name</label>
+                  <input type="text" class="form-control" id="prescriptionPatient" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="prescriptionEmail" class="form-label">Patient Email</label>
+                  <input type="email" class="form-control" id="prescriptionEmail" required>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="prescriptionDate" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="prescriptionDate" required>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="symptoms" class="form-label">Symptoms</label>
+                <textarea class="form-control" id="symptoms" rows="2" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="diagnosis" class="form-label">Diagnosis</label>
+                <textarea class="form-control" id="diagnosis" rows="2" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="medicines" class="form-label">Prescribed Medicines</label>
+                <textarea class="form-control" id="medicines" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Prescription</button>
+              <button type="button" class="btn btn-secondary ms-2" onclick="togglePrescriptionForm()">Cancel</button>
+              <div class="alert alert-success mt-3 d-none" id="prescriptionSuccess">
+                Prescription saved successfully!
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "doctor") {
+      alert("Unauthorized access. Please log in as a Doctor.");
+      window.location.href = "index.html";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+
+    function updateStatus(index, status) {
+      const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      appointments[index].status = status;
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      loadAppointments();
+    }
+
+    function loadAppointments() {
+      const list = document.getElementById("appointmentsList");
+      const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+      if (appointments.length === 0) {
+        list.innerHTML = "<p>No appointment requests available.</p>";
+        return;
+      }
+
+      let table = `
+        <table class='table table-bordered table-striped'>
+          <thead class='table-dark'>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      appointments.forEach((app, index) => {
+        const statusText = app.status ? `<span class="badge bg-${app.status === 'accepted' ? 'success' : 'danger'}">${app.status}</span>` : `<span class="badge bg-warning text-dark">Pending</span>`;
+        const actionButtons = app.status ? '-' : `
+          <button class='btn btn-sm btn-success me-1' onclick='updateStatus(${index}, "accepted")'>Accept</button>
+          <button class='btn btn-sm btn-danger' onclick='updateStatus(${index}, "rejected")'>Reject</button>
+        `;
+
+        table += `
+          <tr>
+            <td>${app.name}</td>
+            <td>${app.age}</td>
+            <td>${app.gender}</td>
+            <td>${app.patientEmail}</td>
+            <td>${app.date}</td>
+            <td>${app.time}</td>
+            <td>${app.reason}</td>
+            <td>${statusText}</td>
+            <td>${actionButtons}</td>
+          </tr>
+        `;
+      });
+
+      table += "</tbody></table>";
+      list.innerHTML = table;
+    }
+
+    function togglePrescriptionForm() {
+      const formCard = document.getElementById("prescriptionFormCard");
+      formCard.style.display = formCard.style.display === "none" ? "block" : "none";
+    }
+
+    document.getElementById("prescriptionForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const prescription = {
+        patientName: document.getElementById("prescriptionPatient").value,
+        patientEmail: document.getElementById("prescriptionEmail").value,
+        date: document.getElementById("prescriptionDate").value,
+        symptoms: document.getElementById("symptoms").value,
+        diagnosis: document.getElementById("diagnosis").value,
+        medicines: document.getElementById("medicines").value
+      };
+
+      let prescriptions = JSON.parse(localStorage.getItem("prescriptions")) || [];
+      prescriptions.push(prescription);
+      localStorage.setItem("prescriptions", JSON.stringify(prescriptions));
+
+      document.getElementById("prescriptionForm").reset();
+      document.getElementById("prescriptionSuccess").classList.remove("d-none");
+
+      setTimeout(() => {
+        document.getElementById("prescriptionSuccess").classList.add("d-none");
+        togglePrescriptionForm();
+      }, 2000);
+    });
+
+    document.addEventListener("DOMContentLoaded", loadAppointments);
+  </script>
+</body>
+</html>
+
+<!-- doctor.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Dashboard - E-Hospital</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    .status-badge {
+      font-size: 0.85rem;
+      padding: 0.3em 0.6em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2>Doctor Dashboard</h2>
+      <button class="btn btn-danger" onclick="logout()">Logout</button>
+    </div>
+    <hr/>
+
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Appointment Requests</h5>
+            <div class="mb-3">
+              <select class="form-select w-auto" id="statusFilter" onchange="loadAppointments()">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div id="appointmentsList">
+              <p>No appointment requests available.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Write Prescription</h5>
+            <button class="btn btn-light" onclick="alert('Prescription form coming soon!')">Write</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card text-white bg-info mb-3">
+          <div class="card-body">
+            <h5 class="card-title">Patient History</h5>
+            <button class="btn btn-light" onclick="alert('Patient history feature coming soon!')">View History</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user || user.role !== "doctor") {
+      alert("Unauthorized access. Please log in as a Doctor.");
+      window.location.href = "index.html";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    }
+
+    function updateStatus(index, status) {
+      const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      appointments[index].status = status;
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      loadAppointments();
+    }
+
+    function loadAppointments() {
+      const list = document.getElementById("appointmentsList");
+      const filter = document.getElementById("statusFilter").value;
+      const appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+
+      const filtered = appointments.map((app, i) => ({ ...app, index: i }))
+        .filter(app => filter === "all" || app.status === filter || (!app.status && filter === "pending"));
+
+      if (filtered.length === 0) {
+        list.innerHTML = "<p>No appointment requests available.</p>";
+        return;
+      }
+
+      let table = `
+        <table class='table table-bordered table-striped'>
+          <thead class='table-dark'>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      filtered.forEach(app => {
+        const statusBadge = app.status
+          ? `<span class="badge bg-${app.status === "accepted" ? "success" : "danger"} status-badge">${app.status}</span>`
+          : `<span class="badge bg-warning text-dark status-badge">Pending</span>`;
+
+        const actions = !app.status || app.status === "pending"
+          ? `<button class='btn btn-sm btn-success me-1' onclick='updateStatus(${app.index}, "accepted")'>Accept</button>
+             <button class='btn btn-sm btn-danger' onclick='updateStatus(${app.index}, "rejected")'>Reject</button>`
+          : "-";
+
+        table += `
+          <tr>
+            <td>${app.name}</td>
+            <td>${app.age}</td>
+            <td>${app.gender}</td>
+            <td>${app.patientEmail}</td>
+            <td>${app.date}</td>
+            <td>${app.time}</td>
+            <td>${app.reason}</td>
+            <td>${statusBadge}</td>
+            <td>${actions}</td>
+          </tr>
+        `;
+      });
+
+      table += "</tbody></table>";
+      list.innerHTML = table;
+    }
+
+    document.addEventListener("DOMContentLoaded", loadAppointments);
+  </script>
+</body>
+</html>
